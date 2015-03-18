@@ -42,6 +42,7 @@ class ElectionSpider(object):
         except:
             pass
         print data
+
         self.driver.close()
 
 spider = ElectionSpider()

@@ -1,3 +1,5 @@
+import csv
+import os
 from selenium import webdriver
 import logging
 
@@ -31,7 +33,7 @@ class CampaignSpider(object):
                 option.click()
                 logging.info("Clicking on %s" % campaign)
                 self.click_submit('//input[@type="submit"]')
-                self.parse_campaign_election_data(campaign)
+                self.write_data(campaign, self.parse_campaign_election_data(campaign))
                 print "we finished %s" % campaign
                 self.driver.get('http://www.chicagoelections.com/en/election3.asp')
 
@@ -69,6 +71,21 @@ class CampaignSpider(object):
     def click_submit(self, xpath):
         submit = self.driver.find_element_by_xpath(xpath)
         submit.click()
+
+    def write_data(self, campaign, data):
+        if not data:
+            return
+        path = os.path.dirname(__file__)
+        filename = path + "/" + campaign.replace('/', '.') + ".csv"
+        csvfile = open(filename, 'w+')
+        fieldnames = data[2]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in data[3:54]:
+            row_data = dict(zip(fieldnames, row))
+            writer.writerow(row_data)
+        csvfile.close()
+
 
 
 spider = CampaignSpider(election="municipal", position="mayor")
